@@ -37,6 +37,11 @@ public static class XMLReader
     {
         return GetAllChildTagByParentTagName("hotfix");
     }
+    
+    internal static string[] GetRequire()
+    {
+        return GetAllChildTagByParentTagName("require");
+    }
 
     public static string[] GetAllChildTagByParentTagName(string tagName)
     {

@@ -35,6 +35,22 @@ public class LuaLoader : MonoBehaviour
         onLuaPending += OnLuaPending;
         await XMLReader.Init();
         int i = 0;
+        /// Init require
+        /// 
+        {
+            var path = "";
+            var scriptName = "";
+            var require = XMLReader.GetRequire();
+            i = 0;
+            foreach (var item in require)
+            {
+                i++;
+                scriptName = item.Split('@')[0];
+                path = item.Split('@')[1];
+                onLuaLoading.Invoke(i * 1f / require.Length * 100, "Library");
+                await DownloadAndDoString(path, null);
+            }
+        }
 
         /// Init hotfix
         /// 
@@ -46,10 +62,10 @@ public class LuaLoader : MonoBehaviour
             foreach (var item in hotPath)
             {
                 i++;
-                scriptName = "[hotfix]" + item.Split('@')[0];
+                scriptName = item.Split('@')[0];
                 path = item.Split('@')[1];
                 Debug.Log("Init Hotfix: " + scriptName);
-                onLuaLoading.Invoke(i * 1f / hotPath.Length, "Init Fix Bug");
+                onLuaLoading.Invoke(i * 1f / hotPath.Length * 100, "Fix Bug");
                 await DownloadAndDoString(path, null);
 
             }
@@ -64,12 +80,12 @@ public class LuaLoader : MonoBehaviour
             foreach (var item in servicePaths)
             {
                 i++;
-                serviceName = "[service]" + item.Split('@')[0];
+                serviceName = item.Split('@')[0];
                 path = item.Split('@')[1];
                 var obj = new GameObject(serviceName).AddComponent<ServiceImplement>();
                 obj.ServiceName = serviceName;
                 obj.Register();
-                onLuaLoading.Invoke(i * 1f / servicePaths.Length, "Init Service");
+                onLuaLoading.Invoke(i * 1f / servicePaths.Length * 100, "Service");
                 await obj.InitLua(path);
                 Debug.Log("Init Service: " + serviceName);
             }
@@ -84,12 +100,11 @@ public class LuaLoader : MonoBehaviour
             foreach (var item in mainPath)
             {
                 i++;
-                scriptName = "[object]" + item.Split('@')[0];
+                scriptName = item.Split('@')[0];
                 path = item.Split('@')[1];
                 var obj = new GameObject(scriptName).AddComponent<LuaScript>();
-                onLuaLoading.Invoke(i * 1f / mainPath.Length, "Init Object");
+                onLuaLoading.Invoke(i * 1f / mainPath.Length * 100, "Object");
                 await obj.InitLua(path);
-                Debug.Log("Init Main: " + scriptName);
             }
         }
         onLuaLoaded?.Invoke();
