@@ -10,9 +10,8 @@ public static class XMLReader
 {
     static XmlDocument xmlDoc;
 
-    public static async Task Init()
+    public static async Task Init(string uri)
     {
-        string uri = "C:/Users/Admin/Project/LuaScript/flappy/flappy_bird.xml";
         var request = UnityWebRequest.Get(uri);
         await request.SendWebRequest();
         xmlDoc = new XmlDocument();

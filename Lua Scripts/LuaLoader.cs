@@ -9,6 +9,7 @@ public delegate void LuaPending(string status);
 
 public class LuaLoader : MonoBehaviour
 {
+    public string configPath;
     public static LuaEnv luaEnv = new LuaEnv();
     public Action onLuaLoaded;
     public LuaStatus onLuaLoading;
@@ -33,7 +34,7 @@ public class LuaLoader : MonoBehaviour
         onLuaLoading += OnLuaLoading;
         onLuaLoaded += OnLuaLoaded;
         onLuaPending += OnLuaPending;
-        await XMLReader.Init();
+        await XMLReader.Init(configPath);
         int i = 0;
 
         /// Init hotfix
