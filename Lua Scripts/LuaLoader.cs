@@ -45,6 +45,7 @@ public class LuaLoader : MonoBehaviour
             i = 0;
             foreach (var item in require)
             {
+                await CheckConnection();
                 i++;
                 scriptName = item.Split('@')[0];
                 path = item.Split('@')[1];
@@ -62,6 +63,7 @@ public class LuaLoader : MonoBehaviour
             i = 0;
             foreach (var item in hotPath)
             {
+                await CheckConnection();
                 i++;
                 scriptName = item.Split('@')[0];
                 path = item.Split('@')[1];
@@ -80,6 +82,7 @@ public class LuaLoader : MonoBehaviour
             i = 0;
             foreach (var item in servicePaths)
             {
+                await CheckConnection();
                 i++;
                 serviceName = item.Split('@')[0];
                 path = item.Split('@')[1];
@@ -100,6 +103,7 @@ public class LuaLoader : MonoBehaviour
             i = 0;
             foreach (var item in mainPath)
             {
+                await CheckConnection();
                 i++;
                 scriptName = item.Split('@')[0];
                 path = item.Split('@')[1];
@@ -116,22 +120,24 @@ public class LuaLoader : MonoBehaviour
         bool result = Application.internetReachability == NetworkReachability.NotReachable;
         while (result)
         {
-            onLuaPending.Invoke("Wait for networking...");
-            await Task.Delay(100);
+            onLuaPending.Invoke("Networking");
+            await Task.Delay(3000);
             result = Application.internetReachability == NetworkReachability.NotReachable;
         }
+        return;
     }
 
     private void OnLuaLoading(float percent, string status)
     {
-        Debug.Log($"Lua Loading ... {status}-{percent}%");
+        Debug.Log($"{status} Loading ... {percent}%");
     }
     private void OnLuaPending(string status)
     {
-        Debug.Log($"Lua Pending ... {status}");
+        Debug.Log($"{status} Pending ...");
     }
 
     private void OnLuaLoaded()
     {
+        Debug.Log($"Lua Loaded");
     }
 }
