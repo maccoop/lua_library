@@ -72,7 +72,6 @@ public class LuaScript : MonoBehaviour
     {
         if (_luaStart != null && !_isStart)
         {
-            Debug.Log("Start ... ");
             _isStart = true;
             _luaStart();
         }

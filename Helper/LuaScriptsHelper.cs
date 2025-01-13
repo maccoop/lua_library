@@ -7,13 +7,6 @@ using XLua;
 
 public static class LuaScriptsHelper
 {
-    [RuntimeInitializeOnLoadMethod]
-    static void Test()
-    {
-        string[] value = new string[] { "casi g", " the a", " uhnhir" };
-        var result = ArrayToListNonGeneric(typeof(int), value);
-        Debug.Log(result);
-    }
 
     [LuaCallCSharp]
     public static object ArrayToListNonGeneric(Type type, object array)
