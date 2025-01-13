@@ -12,7 +12,7 @@ public class ServiceImplement : LuaScript, IEService
 
     public object[] CallMethod(string methodName, params object[] parameters)
     {
-        var funct = this.scriptScopeTable.Get<LuaFunction>(methodName);
+        var funct = this.ScriptScopeTable.Get<LuaFunction>(methodName);
         return funct.Call(parameters);
     }
 }

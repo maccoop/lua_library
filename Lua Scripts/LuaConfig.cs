@@ -14,7 +14,7 @@ using System.Linq;
 using System.Reflection;
 
 //配置的详细介绍请看Doc下《XLua的配置.doc》
-public static class ExampleGenConfig
+public static class ExampleGenConfigg
 {
     //lua中要使用到C#库的配置，比如C#标准库，或者Unity API，第三方库等。
     [LuaCallCSharp]
@@ -48,10 +48,10 @@ public static class ExampleGenConfig
                 typeof(Mathf),
                 typeof(System.Collections.Generic.List<int>),
                 typeof(Action<string>),
-                typeof(UnityEngine.Debug)
+                typeof(UnityEngine.Debug),
+                typeof(byte),
+                typeof(WaitForSeconds)
             };
-
-    //C#静态调用Lua的配置（包括事件的原型），仅可以配delegate，interface
     [CSharpCallLua]
     public static List<Type> CSharpCallLua = new List<Type>() {
                 typeof(Action),
@@ -62,7 +62,6 @@ public static class ExampleGenConfig
                 typeof(System.Collections.IEnumerator)
             };
 
-    //黑名单
     [BlackList]
     public static List<List<string>> BlackList = new List<List<string>>()  {
                 new List<string>(){"System.Xml.XmlNodeList", "ItemOf"},
@@ -96,7 +95,7 @@ public static class ExampleGenConfig
                 new List<string>(){"System.IO.DirectoryInfo", "Create", "System.Security.AccessControl.DirectorySecurity"},
                 new List<string>(){"UnityEngine.MonoBehaviour", "runInEditMode"},
             };
-    
+
     public static List<Type> BlackGenericTypeList = new List<Type>()
     {
         typeof(Span<>),
@@ -109,7 +108,8 @@ public static class ExampleGenConfig
         return BlackGenericTypeList.Contains(type.GetGenericTypeDefinition());
     }
 
-    [BlackList] public static Func<MemberInfo, bool> GenericTypeFilter = (memberInfo) =>
+    [BlackList]
+    public static Func<MemberInfo, bool> GenericTypeFilter = (memberInfo) =>
     {
         switch (memberInfo)
         {

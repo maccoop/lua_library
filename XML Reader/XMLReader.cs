@@ -41,6 +41,11 @@ public static class XMLReader
     {
         return GetAllChildTagByParentTagName("require");
     }
+    
+    internal static string[] GetPreload()
+    {
+        return GetAllChildTagByParentTagName("preload");
+    }
 
     public static string[] GetAllChildTagByParentTagName(string tagName)
     {

@@ -15,26 +15,43 @@ public class LuaScript : MonoBehaviour
     public Injection[] injections;
     public static float lastGCTime = 0;
     public const float GCInterval = 1;//1 second 
-    protected LuaTable scriptScopeTable;
-    private Action luaStart;
-    private Action luaUpdate;
-    private Action luaOnDestroy;
+    public string Path;
+    protected LuaTable ScriptScopeTable { get; set; }
+    private Action _luaAwake;
+    private Action _luaStart;
+    private Action _luaUpdate;
+    private Action _luaOnDestroy;
     private Action onGUI;
-    private Action<Collider> luaOnTriggerEnter;
-    private Action<Collider2D> luaOnTriggerEnter2D;
-    bool isStart = false;
+    private Action<Collider> _luaOnTriggerEnter;
+    private Action<Collider2D> _luaOnTriggerEnter2D;
+    private bool _isStart = false;
+    private LuaEnv _env;
 
-    public virtual async Task InitLua(string path)
+    [LuaCallCSharp]
+    public async void InitLuaDef(string path)
     {
+        if (_env == null)
+            _env = LuaLoader.CurrentEnv;
+        await InitLua(path, _env);
+    }
+
+    public virtual async Task InitLua(string path, LuaEnv env)
+    {
+        _env = env;
+        Path = path;
         int cframe = Time.frameCount;
         NewScopeTable();
-        await LuaLoader.DownloadAndDoString(path, scriptScopeTable);
-        scriptScopeTable.Get("start", out luaStart);
-        scriptScopeTable.Get("update", out luaUpdate);
-        scriptScopeTable.Get("ondestroy", out luaOnDestroy);
-        scriptScopeTable.Get("onTriggerEnter2D", out luaOnTriggerEnter2D);
-        scriptScopeTable.Get("onTriggerEnter", out luaOnTriggerEnter);
-        scriptScopeTable.Get("ongui", out onGUI);
+        await LuaLoader.DownloadAndDoString(path, env, ScriptScopeTable);
+        ScriptScopeTable.Get("awake", out _luaAwake);
+        ScriptScopeTable.Get("start", out _luaStart);
+        ScriptScopeTable.Get("update", out _luaUpdate);
+        ScriptScopeTable.Get("ondestroy", out _luaOnDestroy);
+        ScriptScopeTable.Get("onTriggerEnter2D", out _luaOnTriggerEnter2D);
+        ScriptScopeTable.Get("onTriggerEnter", out _luaOnTriggerEnter);
+        ScriptScopeTable.Get("ongui", out onGUI);
+        Debug.Log("Get Functions Success: " + path);
+        if (_luaAwake != null)
+            _luaAwake();
         if (cframe != Time.frameCount)
             Start();
         return;
@@ -42,37 +59,38 @@ public class LuaScript : MonoBehaviour
 
     void NewScopeTable()
     {
-        scriptScopeTable = LuaLoader.luaEnv.NewTable();
-        using (LuaTable meta = LuaLoader.luaEnv.NewTable())
+        ScriptScopeTable = _env.NewTable();
+        using (LuaTable meta = _env.NewTable())
         {
-            meta.Set("__index", LuaLoader.luaEnv.Global);
-            scriptScopeTable.SetMetaTable(meta);
+            meta.Set("__index", _env.Global);
+            ScriptScopeTable.SetMetaTable(meta);
         }
-        scriptScopeTable.Set("self", this);
+        ScriptScopeTable.Set("self", this);
     }
 
     private void Start()
     {
-        if (luaStart != null && !isStart)
+        if (_luaStart != null && !_isStart)
         {
-            isStart = true;
-            luaStart();
+            Debug.Log("Start ... ");
+            _isStart = true;
+            _luaStart();
         }
     }
 
     private void Update()
     {
-        if (luaUpdate != null)
+        if (_luaUpdate != null)
         {
-            luaUpdate();
+            _luaUpdate();
         }
     }
 
     private void OnDestroy()
     {
-        if (luaOnDestroy != null)
+        if (_luaOnDestroy != null)
         {
-            luaOnDestroy();
+            _luaOnDestroy();
         }
     }
 
@@ -86,17 +104,17 @@ public class LuaScript : MonoBehaviour
 
     private void OnTriggerEnter(Collider other)
     {
-        if (luaOnTriggerEnter != null)
+        if (_luaOnTriggerEnter != null)
         {
-            luaOnTriggerEnter.Invoke(other);
+            _luaOnTriggerEnter.Invoke(other);
         }
     }
 
     private void OnTriggerEnter2D(Collider2D collision)
     {
-        if (luaOnTriggerEnter2D != null)
+        if (_luaOnTriggerEnter2D != null)
         {
-            luaOnTriggerEnter2D.Invoke(collision);
+            _luaOnTriggerEnter2D.Invoke(collision);
         }
     }
 
@@ -112,14 +130,17 @@ public class LuaScript : MonoBehaviour
         ActionOnEvent[key].Invoke();
     }
 
+    [LuaCallCSharp]
     public object CallMethod(string method, params object[] parameters)
     {
         return GetType().GetMethod(method).Invoke(this, parameters);
     }
 
+    [LuaCallCSharp]
     public object[] CallLuaFunc(string method, params object[] parameters)
     {
-        var lua = scriptScopeTable.Get<LuaFunction>(method);
+        Debug.Log("Lua call Me to Call Lua Func");
+        var lua = ScriptScopeTable.Get<LuaFunction>(method);
         return lua.Call(parameters);
     }
 
