@@ -15,7 +15,7 @@ public delegate void LuaPending(string status);
 public class LuaLoader : MonoBehaviour
 {
 #if UNITY_EDITOR
-    public const string PATH = "C:/Users/Admin/Project/LuaScript/KV1/";
+    public const string PATH = "C:/Users/Admin/Project/LuaScript/flappy";
     public const bool CACHE_CODE = false;
 #else
     public const string PATH = "url to file";
