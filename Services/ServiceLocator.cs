@@ -33,6 +33,17 @@ public class ServiceLocator : MonoBehaviour
             throw new Exception(e.Message);
         }
     }
+    public T GetService<T>() where T : IEService
+    {
+        try
+        {
+            return (T)_services[typeof(T).Name];
+        }
+        catch (Exception e)
+        {
+            throw new Exception(e.Message);
+        }
+    }
     public void Register(string serviceName, IEService service)
     {
         if (_services.ContainsKey(serviceName))
